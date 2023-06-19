@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $products = \App\Models\Product::all();
-
+        $products = Product::with('images')->get();
         return view('welcome', ['products' => $products]);
     }
 
     //return a product by id in json format
     public function product($id): \Illuminate\Http\JsonResponse
     {
-        $product = \App\Models\Product::find($id);
+        $product = Product::with('images')->find($id);
         return response()->json($product);
     }
 
@@ -33,58 +34,79 @@ class ProductController extends Controller
             'category' => 'required',
             'price' => 'required',
             'old_price' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'description' => 'required',
+            'images' => 'required',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $imageName = time().'.'.$request->image->extension();
+        $productData = $request->except('images');
 
-        $request->image->move(public_path('img'), $imageName);
+        if($request->hasFile('images')) {
+            $images = $request->file('images');
+            $imageName = time() . '.' . $images[0]->extension();
+            $images[0]->move(public_path('img'), $imageName);
+            $productData['image'] = $imageName;
+        }
 
-        \App\Models\Product::create([
-            'name' => $request->name,
-            'category' => $request->category,
-            'price' => $request->price,
-            'old_price' => $request->old_price,
-            'image' => $imageName,
-        ]);
+        $product = Product::create($productData);
+
+        if($request->hasFile('images')) {
+            foreach (array_slice($images, 1) as $image) {
+                $imageName = time() . '.' . $image->extension();
+                $image->move(public_path('img'), $imageName);
+                $product->images()->create(['filename' => $imageName]);
+            }
+        }
 
         return redirect()->route('products.index');
     }
 
-    public function edit($id)
+    /**
+     * @throws AuthorizationException
+     */
+    public function edit($id): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $product = \App\Models\Product::findOrFail($id);
+        $this->authorize('manage-products');
+        $product = Product::findOrFail($id);
 
         return view('edit', ['product' => $product]);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * @throws AuthorizationException
+     */
+    public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
     {
-        $product = \App\Models\Product::findOrFail($id);
+        $this->authorize('manage-products');
+        $product = Product::findOrFail($id);
 
         $request->validate([
-            'name' => 'required',
-            'category' => 'required',
-            'price' => 'required',
-            'old_price' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name' => 'sometimes',
+            'category' => 'sometimes',
+            'price' => 'sometimes',
+            'old_price' => 'sometimes',
+            'description' => 'sometimes',
+            'images' => 'nullable',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $product->name = $request->name;
-        $product->category = $request->category;
-        $product->price = $request->price;
-        $product->old_price = $request->old_price;
-
-        if($request->hasFile('image')){
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('img'), $imageName);
-            $product->image = $imageName;
+        if(!$request->filled(['name', 'category', 'price', 'old_price', 'description']) && !$request->hasFile('images')) {
+            return back()->withErrors(['error' => 'At least one field must be filled to update.']);
         }
 
-        $product->save();
+        $product->update($request->except('images'));
+
+        if($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '.' . $image->extension();
+                $image->move(public_path('img'), $imageName);
+                $product->images()->create(['filename' => $imageName]);
+            }
+        }
 
         return redirect()->route('products.index');
     }
+
 
     public function destroy($id): \Illuminate\Http\RedirectResponse
     {
@@ -97,11 +119,17 @@ class ProductController extends Controller
 
     public function editindex(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $products = \App\Models\Product::all();
+        $products = Product::all();
 
         return view('manage', ['products' => $products]);
     }
 
+    public function getProduct($productId)
+    {
+        $product = Product::with('images')->find($productId);
+        $sameCategoryProducts = Product::where('category', $product->category)->get();
 
+        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts]);
+    }
 
 }

@@ -257,6 +257,7 @@
 							<!-- product -->
                             @foreach ($products as $product)
                                 <div class="col-md-4 col-xs-6">
+                                    <a href="{{ route('products.prod', $product->id) }}">
                                     <div class="product">
                                         <div class="product-img">
                                             <img src="{{ asset('img/' . $product->image) }}" alt="">
@@ -293,6 +294,7 @@
                                             <button class="add-to-cart-btn" data-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i> add to cart</button>
                                         </div>
                                     </div>
+                                    </a>
                                 </div>
                             @endforeach
 						</div>
@@ -412,14 +414,6 @@
 
         </script>
 
-
-        <!-- jQuery Plugins -->
-		<script src="{{ asset('js/jquery.min.js') }}"></script>
-		<script src="{{ asset('js/bootstrap.min.js') }}"></script>
-		<script src="{{ asset('js/slick.min.js') }}"></script>
-		<script src="{{ asset('js/nouislider.min.js') }}"></script>
-		<script src="{{ asset('js/jquery.zoom.min.js') }}"></script>
-		<script src="{{ asset('js/main.js') }}"></script>
 
 	</body>
 </html>

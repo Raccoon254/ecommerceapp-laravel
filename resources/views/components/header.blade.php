@@ -1,10 +1,42 @@
 <head>
+    @php
+        $route = \Illuminate\Support\Facades\Route::currentRouteName();
+        switch ($route) {
+            case 'dashboard':
+                $title = 'Dashboard';
+                break;
+            case 'profile.edit':
+            case 'profile.update':
+            case 'profile.destroy':
+                $title = 'Profile';
+                break;
+            case 'products.index':
+            case 'products.product':
+                $title = 'Products';
+                break;
+            case 'cart.index':
+            case 'cart.data':
+                $title = 'Cart';
+                break;
+            case 'checkout.index':
+                $title = 'Checkout';
+                break;
+            case 'products.edit':
+            case 'products.update':
+            case 'products.destroy':
+                $title = 'Manage Products';
+                break;
+            default:
+                $title = 'Electro - HTML Ecommerce Template';
+        }
+    @endphp
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-    <title>Electro - HTML Ecommerce Template</title>
+    <title>{{ $title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 

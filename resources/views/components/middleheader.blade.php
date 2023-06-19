@@ -1,5 +1,8 @@
 <!-- MAIN HEADER -->
 <div id="header">
+    @php
+        use Illuminate\Support\Facades\Auth
+    @endphp
     <!-- container -->
     <div class="container">
         <!-- row -->
@@ -8,7 +11,7 @@
             <div class="col-md-3">
                 <div class="header-logo">
                     <a href="./products" class="logo">
-                        <img src="./img/logo.png" alt="">
+                        <img src="{{ asset('img/logo.png') }}" alt="">
                     </a>
                 </div>
             </div>
@@ -37,17 +40,29 @@
                     <div>
                         <a href="#">
                             <i class="fa fa-heart-o"></i>
-                            <span>Your Wishlist</span>
+                            <span>Wishlist</span>
                             <div class="wish">0</div>
                         </a>
                     </div>
                     <!-- /Wishlist -->
 
+                    <!-- Add Product -->
+                    @if (Auth::check() && Auth::user()->isAdmin())
+                        <div>
+                            <a href="{{ route('add.prod') }}">
+                                <i class="fa fa-plus-circle"></i>
+                                <span>Add Prod</span>
+                            </a>
+                        </div>
+                    @endif
+                    <!-- /Add Product -->
+
+
                     <!-- Cart -->
                     <div class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                             <i class="fa fa-shopping-cart"></i>
-                            <span>Your Cart</span>
+                            <span>Cart</span>
                             <div class="qty">0</div>
                         </a>
                         <div class="cart-dropdown">

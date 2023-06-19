@@ -20,5 +20,11 @@ class Product extends Model
         'price',
         'old_price',
         'image',
+        'description',
     ];
+
+    public function images(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }

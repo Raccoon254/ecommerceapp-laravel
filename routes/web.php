@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,14 +14,18 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\ProductController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //Route to check out page return view
+    Route::get('/checkout', function () {
+        return view('checkout');
+    })->name('checkout.index');
+
 });
 
 require __DIR__ . '/auth.php';
@@ -51,16 +56,31 @@ Route::get('/wishlist/data', [\App\Http\Controllers\WishlistController::class, '
 Route::delete('/wishlist/remove/{productId}', [\App\Http\Controllers\WishlistController::class, 'remove']);
 Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
 
-//Route to checkout page return view
-Route::get('/checkout', function () {
-    return view('checkout');
-})->name('checkout.index');
 
-Route::get('/products/create', 'App\Http\Controllers\ProductController@create');
+
+Route::get('/create', 'App\Http\Controllers\ProductController@create')->name('add.prod');
 Route::post('/prod', 'App\Http\Controllers\ProductController@store');
 
 Route::get('/products/{id}/edit', 'App\Http\Controllers\ProductController@edit')->name('products.edit');
 Route::patch('/products/{id}', 'App\Http\Controllers\ProductController@update')->name('products.update');
 Route::delete('/products/{id}', 'App\Http\Controllers\ProductController@destroy')->name('products.destroy');
 
-Route::get('/manage', 'App\Http\Controllers\ProductController@editindex');
+Route::get('/manage', 'App\Http\Controllers\ProductController@editindex')->name('manage.products');
+
+//return the product view
+Route::get('/prod/id', function (){
+    return view('product');
+});
+
+Route::get('/getProduct/{productId}', [\App\Http\Controllers\ProductController::class, 'getProduct'])->name('products.prod');
+
+Route::get('/account', function () {
+    // Check if user is logged in
+    if (Auth::check()) {
+        // Redirect to the profile page if the user is logged in
+        return redirect()->route('profile.edit');
+    } else {
+        // Redirect to the login page if the user is not logged in
+        return redirect()->route('login');
+    }
+})->name('account');
