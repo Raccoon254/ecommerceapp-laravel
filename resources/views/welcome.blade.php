@@ -254,7 +254,10 @@
 
 						<!-- store products -->
 						<div class="row">
-							<!-- product -->
+                            <div id="product-list">
+                                @include('product-list-partial', ['products' => $products])
+                            </div>
+                            <!-- product -->
                             @foreach ($products as $product)
                                 <div class="col-md-4 col-xs-6">
                                     <a href="{{ route('products.prod', $product->id) }}">
@@ -276,14 +279,20 @@
                                             <h3 class="product-name"><a href="#">{{ $product->name }}</a></h3>
                                             <h4 class="product-price">${{ $product->price }} <del class="product-old-price">${{ $product->old_price }}</del></h4>
                                             <div class="product-rating">
-                                                @for($i = 0; $i < 5; $i++)
-                                                    @if($product->rating > $i)
-                                                        <i class="fa fa-star"></i>
-                                                    @else
-                                                        <i class="fa fa-star-o"></i>
-                                                    @endif
-                                                @endfor
+                                                <form action="{{ route('ratings.store', $product) }}" method="POST">
+                                                    @csrf
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <button type="submit" name="rating" value="{{ $i }}" class="star rating-button" title="Rate this {{ $i }} out of 5 stars">
+                                                            @if($product->averageRating() >= $i)
+                                                                <i class="fa fa-star"></i>
+                                                            @else
+                                                                <i class="fa fa-star-o"></i>
+                                                            @endif
+                                                        </button>
+                                                    @endfor
+                                                </form>
                                             </div>
+
                                             <div class="product-btns">
                                                 <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
                                                 <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
@@ -322,98 +331,93 @@
 		<!-- /SECTION -->
 
         @include('components.footer')
+<script>
+    $('.input-number').each(function() {
+        var $this = $(this),
+            $input = $this.find('input[type="number"]'),
+            up = $this.find('.qty-up'),
+            down = $this.find('.qty-down');
 
-        <script>
+        down.on('click', function () {
+            var value = parseInt($input.val()) - 1;
+            value = value < 1 ? 1 : value;
+            $input.val(value);
+            $input.change();
+            updatePriceSlider($this , value)
+        })
 
-            $(document).ready(function() {
-                $('.add-to-cart-btn').click(function() {
-                    var productId = $(this).data('id');
+        up.on('click', function () {
+            var value = parseInt($input.val()) + 1;
+            $input.val(value);
+            $input.change();
+            updatePriceSlider($this , value)
+        })
+    });
 
-                    $.ajax({
-                        url: '/add-to-cart',
-                        type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            productId: productId
-                        },
-                        success: function(response) {
-                            // Update the cart data on success.
-                            updateCart(response);
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
-                });
-            });
+    var priceInputMax = document.getElementById('price-max'),
+        priceInputMin = document.getElementById('price-min');
 
+    //if price inputs are not null
+    if(priceInputMax && priceInputMin){
+        priceInputMax.addEventListener('change', function(){
+            updatePriceSlider($(this).parent() , this.value)
+        });
 
-            function updateCart(cartData) {
-                $('.cart-list').empty();
-                let totalItems = 0;
-                let subtotal = 0;
+        priceInputMin.addEventListener('change', function(){
+            updatePriceSlider($(this).parent() , this.value)
+        });
+    }
 
-                for (var id in cartData) {
-                    let product = cartData[id];
-                    let totalProductPrice = product.price * product.quantity;
+    function updatePriceSlider(elem , value) {
+        if ( elem.hasClass('price-min') ) {
+            //console.log('min')
+            //fetchProducts(priceInputMin.value, priceInputMax.value);
+            priceSlider.noUiSlider.set([value, null]);
+        } else if ( elem.hasClass('price-max')) {
+            //console.log('max')
+            //fetchProducts(priceInputMin.value, priceInputMax.value);
+            priceSlider.noUiSlider.set([null, value]);
+        }
+    }
 
-                    $('.cart-list').append(
-                        `<div class="product-widget">
-                <div class="product-img">
-                   <img src="./img/${product.image}" alt="">
-                </div>
-                <div class="product-body">
-                    <h3 class="product-name"><a href="#">${product.name}</a></h3>
-                    <h4 class="product-price"><span class="qty">${product.quantity}x</span>$${totalProductPrice.toFixed(2)}</h4>
-                </div>
-                <button class="delete" data-id="${id}"><i class="fa fa-close"></i></button>
-            </div>`
-                    );
-
-                    totalItems += product.quantity;
-                    subtotal += totalProductPrice;
-                }
-
-                $('.qty').text(totalItems);
-                $('.cart-summary small').text(totalItems + ' Item(s) selected');
-                $('.cart-summary h5').text('SUBTOTAL: $' + subtotal.toFixed(2));
-
-                // Refresh event listeners for delete buttons
-                $('.delete').click(function() {
-                    let productId = $(this).data('id');
-
-                    $.ajax({
-                        url: '/cart/remove/' + productId,
-                        type: 'GET',
-                        success: function(response) {
-                            // Update the cart data on success.
-                            updateCart(response);
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
-                });
+    // Price Slider
+    var priceSlider = document.getElementById('price-slider');
+    if (priceSlider) {
+        noUiSlider.create(priceSlider, {
+            start: [1, 999],
+            connect: true,
+            step: 1,
+            range: {
+                'min': 1,
+                'max': 999
             }
+        });
 
-            //update cart on page load
-            $(document).ready(function() {
-                $.ajax({
-                    url: '/cartData', // replace this with the URL that returns your cart data in JSON format
-                    type: 'GET',
-                    success: function(response) {
-                        // update the cart UI with the data received from server
-                        updateCart(response);
-                    },
-                    error: function(response) {
-                        console.log(response);
-                    }
-                });
+        priceSlider.noUiSlider.on('update', function(values, handle) {
+            var value = values[handle];
+            handle ? priceInputMax.value = value : priceInputMin.value = value
+
+            // Fetch products within selected price range using AJAX
+            fetchProducts(priceInputMin.value, priceInputMax.value);
+        });
+
+        function fetchProducts(minPrice, maxPrice) {
+            $.ajax({
+                url: "{{ route('products.filter') }}",
+                type: "GET",
+                data: {
+                    min_price: minPrice,
+                    max_price: maxPrice
+                },
+                success: function(data) {
+                    // Update product list on the page
+                    // Replace '#product-list' with the actual id or class of your product list container
+                    $('#product-list').html(data);
+                }
             });
+        }
 
-
-        </script>
-
-
+    }
+</script>
 	</body>
 </html>

@@ -27,4 +27,14 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+
+    public function ratings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
+    }
 }

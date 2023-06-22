@@ -18,9 +18,8 @@
 						<ul class="breadcrumb-tree">
 							<li><a href="#">Home</a></li>
 							<li><a href="#">All Categories</a></li>
-							<li><a href="#">Accessories</a></li>
-							<li><a href="#">Headphones</a></li>
-							<li class="active">Product name goes here</li>
+							<li><a href="#">{{ $product->category }}</a></li>
+							<li class="active">{{$product->name}}</li>
 						</ul>
 					</div>
 				</div>
@@ -39,21 +38,27 @@
 					<!-- Product main img -->
 					<div class="col-md-5 col-md-push-2">
 						<div id="product-main-img">
-                            @foreach($sameCategoryProducts as $sameCategoryProduct)
                                 <div class="product-preview">
-                                    <img src="{{ asset('img/' . $sameCategoryProduct->image) }}" alt="">
+                                    <img class="rounded" src="{{ asset('img/' . $product->image) }}" alt="">
+                                </div>
+                            @foreach($product->images as $image)
+                                <div class="product-preview">
+                                    <img class="rounded" src="{{ asset('img/' . $image->filename) }}" alt="">
                                 </div>
                             @endforeach
-						</div>
+                        </div>
 					</div>
 					<!-- /Product main img -->
 
 					<!-- Product thumb imgs -->
 					<div class="col-md-2  col-md-pull-5">
 						<div id="product-imgs">
-                            @foreach($sameCategoryProducts as $sameCategoryProduct)
+                            <div class="product-preview">
+                                <img src="{{ asset('img/' . $product->image) }}" alt="">
+                            </div>
+                            @foreach($product->images as $image)
                                 <div class="product-preview">
-                                    <img src="{{ asset('img/' . $sameCategoryProduct->image) }}" alt="">
+                                    <img src="{{ asset('img/' . $image->filename) }}" alt="">
                                 </div>
                             @endforeach
 						</div>
@@ -106,7 +111,7 @@
 										<span class="qty-down">-</span>
 									</div>
 								</div>
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+								<button class="add-to-cart-btn" data-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i> add to cart</button>
 							</div>
 
 							<ul class="product-btns">

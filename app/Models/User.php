@@ -54,4 +54,10 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->role === 'user';
     }
 
+    public function ratings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+
 }

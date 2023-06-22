@@ -10,7 +10,7 @@
             <!-- LOGO -->
             <div class="col-md-3">
                 <div class="header-logo">
-                    <a href="./products" class="logo">
+                    <a href="{{ route("products.index") }}" class="logo">
                         <img src="{{ asset('img/logo.png') }}" alt="">
                     </a>
                 </div>

@@ -43,7 +43,7 @@ class ProductController extends Controller
 
         if($request->hasFile('images')) {
             $images = $request->file('images');
-            $imageName = time() . '.' . $images[0]->extension();
+            $imageName = time() . '_0.' . $images[0]->extension();
             $images[0]->move(public_path('img'), $imageName);
             $productData['image'] = $imageName;
         }
@@ -51,8 +51,9 @@ class ProductController extends Controller
         $product = Product::create($productData);
 
         if($request->hasFile('images')) {
+            $i = 1;
             foreach (array_slice($images, 1) as $image) {
-                $imageName = time() . '.' . $image->extension();
+                $imageName = time() . '_' . $i++ . '.' . $image->extension();
                 $image->move(public_path('img'), $imageName);
                 $product->images()->create(['filename' => $imageName]);
             }
@@ -94,19 +95,28 @@ class ProductController extends Controller
             return back()->withErrors(['error' => 'At least one field must be filled to update.']);
         }
 
-        $product->update($request->except('images'));
+        $productData = $request->except('images');
 
         if($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imageName = time() . '.' . $image->extension();
+            $images = $request->file('images');
+            $imageName = time() . '_0.' . $images[0]->extension();
+            $images[0]->move(public_path('img'), $imageName);
+            $productData['image'] = $imageName;
+
+            $product->images()->delete(); // delete previous associated images
+
+            $i = 1;
+            foreach (array_slice($images, 1) as $image) {
+                $imageName = time() . '_' . $i++ . '.' . $image->extension();
                 $image->move(public_path('img'), $imageName);
                 $product->images()->create(['filename' => $imageName]);
             }
         }
 
+        $product->update($productData);
+
         return redirect()->route('products.index');
     }
-
 
     public function destroy($id): \Illuminate\Http\RedirectResponse
     {
@@ -124,12 +134,26 @@ class ProductController extends Controller
         return view('manage', ['products' => $products]);
     }
 
-    public function getProduct($productId)
+    public function getProduct($productId): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $product = Product::with('images')->find($productId);
+        //dd($product);
         $sameCategoryProducts = Product::where('category', $product->category)->get();
 
         return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts]);
     }
+
+    public function filter(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    {
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+
+        $products = Product::with('images')
+            ->whereBetween('price', [$minPrice, $maxPrice])
+            ->get();
+
+        return view('product-list-partial', ['products' => $products]);
+    }
+
 
 }

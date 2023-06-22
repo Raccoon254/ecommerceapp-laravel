@@ -514,6 +514,14 @@ textarea.input {
   color: #FFF;
 }
 
+.rounded{
+    border-radius: 5px !important;
+}
+
+.rounded:hover {
+    border-radius: 10px !important;
+}
+
 .header-ctn>div>a>i {
   display: block;
   font-size: 18px;
@@ -966,6 +974,7 @@ textarea.input {
   transform: translateY(-50%);
   height: 1px;
   background-color: #E4E7ED;
+    z-index: -1;
 }
 
 .product .product-body .product-btns>button {
@@ -2187,4 +2196,15 @@ textarea.input {
     float: none;
     margin-top: 10px;
   }
+}
+
+.rating-button{
+    border: none;
+    background: none;
+    margin: 0;
+    padding: 1px;
+}
+.rating-button:hover{
+    background: none;
+
 }

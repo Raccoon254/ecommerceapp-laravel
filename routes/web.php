@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RatingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('checkout');
     })->name('checkout.index');
 
+    Route::post('/products/{product}/ratings', [RatingController::class, 'store'])->name('ratings.store');
 });
 
 require __DIR__ . '/auth.php';
@@ -84,3 +86,5 @@ Route::get('/account', function () {
         return redirect()->route('login');
     }
 })->name('account');
+
+Route::get('/products/filter/hdshfehszhdwahdwhaadhhdhdas', [App\Http\Controllers\ProductController::class, 'filter'])->name('products.filter');
