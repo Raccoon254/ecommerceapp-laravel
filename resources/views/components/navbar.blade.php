@@ -1,6 +1,7 @@
 @include('components.topheader')
 @include('components.middleheader')
 @include('components.lowerheader')
+<script src="https://kit.fontawesome.com/af6aba113a.js" crossorigin="anonymous"></script>
 <script>
 
     $(document).ready(function() {

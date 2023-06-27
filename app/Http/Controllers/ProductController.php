@@ -5,13 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $products = Product::with('images')->get();
-        return view('welcome', ['products' => $products]);
+
+        $categories = Product::select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->get();
+
+        return view('welcome', ['products' => $products, 'categories' => $categories]);
     }
 
     //return a product by id in json format
@@ -21,8 +28,12 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function create(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorize('manage-products');
         return view('create');
     }
 
@@ -118,17 +129,25 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function destroy($id): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('manage-products');
         $product = \App\Models\Product::findOrFail($id);
-
+        $product->productReviews()->delete();
         $product->delete();
 
-        return redirect()->route('products.index');
+        return redirect()->route('manage.products');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function editindex(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorize('manage-products');
         $products = Product::all();
 
         return view('manage', ['products' => $products]);
@@ -137,10 +156,17 @@ class ProductController extends Controller
     public function getProduct($productId): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $product = Product::with('images')->find($productId);
-        //dd($product);
         $sameCategoryProducts = Product::where('category', $product->category)->get();
 
-        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts]);
+        $reviews = $product->productReviews()->paginate(10);  // paginate reviews
+        $ratings = $product->ratings; // get ratings
+
+        $userRating = $product->ratings()->where('user_id', Auth::id())->first(); // get user rating
+        //dd($userRating->rating);
+
+        $reviewCount = $product->productReviews()->count();  // count the number of reviews
+
+        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts, 'reviews' => $reviews, 'ratings' => $ratings, 'reviewCount' => $reviewCount, 'userRating' => $userRating]);
     }
 
     public function filter(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
@@ -152,6 +178,12 @@ class ProductController extends Controller
             ->whereBetween('price', [$minPrice, $maxPrice])
             ->get();
 
+        return view('product-list-partial', ['products' => $products]);
+    }
+
+    public function filterByCategory(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    {
+        $products = Product::whereIn('category', $request->categories)->get();
         return view('product-list-partial', ['products' => $products]);
     }
 

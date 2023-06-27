@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductReviews;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout', function () {
         return view('checkout');
     })->name('checkout.index');
+
+    Route::get('/products/{product}/reviews/create', [App\Http\Controllers\ProductReviews::class, 'create'])->name('review.create');
 
     Route::post('/products/{product}/ratings', [RatingController::class, 'store'])->name('ratings.store');
 });
@@ -87,4 +90,9 @@ Route::get('/account', function () {
     }
 })->name('account');
 
-Route::get('/products/filter/hdshfehszhdwahdwhaadhhdhdas', [App\Http\Controllers\ProductController::class, 'filter'])->name('products.filter');
+Route::get('/products/filter/', [App\Http\Controllers\ProductController::class, 'filter'])->name('products.filter');
+
+//Route::post('/products/{product}/reviews', [App\Http\Controllers\ProductReviews::class, 'store']);
+Route::post('/products/{product}/reviews', [App\Http\Controllers\ProductReviews::class, 'store'])->name('product_reviews.store');
+
+Route::get('/products/filter', [App\Http\Controllers\ProductController::class, 'filterByCategory'])->name('products.filter');

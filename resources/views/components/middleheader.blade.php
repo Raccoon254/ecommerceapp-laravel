@@ -37,13 +37,22 @@
             <div class="col-md-3 clearfix">
                 <div class="header-ctn">
                     <!-- Wishlist -->
+                    @if (Auth::check() && Auth::user()->isAdmin())
                     <div>
-                        <a href="#">
-                            <i class="fa fa-heart-o"></i>
-                            <span>Wishlist</span>
-                            <div class="wish">0</div>
+                        <a href="{{ route('manage.products') }}">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                            <span>Manage</span>
                         </a>
                     </div>
+                    @else
+                        <div>
+                            <a href="#">
+                                <i class="fa fa-heart-o"></i>
+                                <span>Wishlist</span>
+                                <div class="wish">0</div>
+                            </a>
+                        </div>
+                    @endif
                     <!-- /Wishlist -->
 
                     <!-- Add Product -->
