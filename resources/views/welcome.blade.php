@@ -43,81 +43,43 @@
 				<div class="row">
 					<!-- ASIDE -->
 					<div id="aside" class="col-md-3">
-						<!-- aside Widget -->
-						<div class="aside">
-							<h3 class="aside-title">Categories</h3>
-							<div class="checkbox-filter">
+                        <!-- aside Widget -->
+                        <div class="aside">
+                            <h3 class="aside-title">Categories</h3>
+                            <!-- Category Filter -->
+                            <div class="checkbox-filter">
+                                <ul>
+                                    @foreach($categories as $category)
+                                        <li>
+                                            <input type="checkbox" id="category-{{ $category->id }}" class="category-checkbox" data-category="{{ $category->category }}">
+                                            <label for="category-{{ $category->id }}">
+                                                <span></span>
+                                                {{ $category->category }}
+                                                <small>({{ $category->total }})</small>
+                                            </label>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
 
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-1">
-									<label for="category-1">
-										<span></span>
-										Laptops
-										<small>(120)</small>
-									</label>
-								</div>
+                            <button id="apply-filter">Apply</button>
+                            <!-- /Category Filter -->
+                        </div>
+                        <!-- /aside Widget -->
 
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-2">
-									<label for="category-2">
-										<span></span>
-										Smartphones
-										<small>(740)</small>
-									</label>
-								</div>
-
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-3">
-									<label for="category-3">
-										<span></span>
-										Cameras
-										<small>(1450)</small>
-									</label>
-								</div>
-
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-4">
-									<label for="category-4">
-										<span></span>
-										Accessories
-										<small>(578)</small>
-									</label>
-								</div>
-
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-5">
-									<label for="category-5">
-										<span></span>
-										Laptops
-										<small>(120)</small>
-									</label>
-								</div>
-
-								<div class="input-checkbox">
-									<input type="checkbox" id="category-6">
-									<label for="category-6">
-										<span></span>
-										Smartphones
-										<small>(740)</small>
-									</label>
-								</div>
-							</div>
-						</div>
-						<!-- /aside Widget -->
-
-						<!-- aside Widget -->
+                        <!-- aside Widget -->
 						<div class="aside">
 							<h3 class="aside-title">Price</h3>
 							<div class="price-filter">
 								<div id="price-slider"></div>
 								<div class="input-number price-min">
-									<input id="price-min" type="number">
+                                    <label for="price-min"></label><input id="price-min" type="number">
 									<span class="qty-up">+</span>
 									<span class="qty-down">-</span>
 								</div>
 								<span>-</span>
 								<div class="input-number price-max">
-									<input id="price-max" type="number">
+                                    <label for="price-max"></label><input id="price-max" type="number">
 									<span class="qty-up">+</span>
 									<span class="qty-down">-</span>
 								</div>
@@ -257,61 +219,12 @@
                             <div id="product-list">
                                 @include('product-list-partial', ['products' => $products])
                             </div>
-                            <!-- product -->
-                            @foreach ($products as $product)
-                                <div class="col-md-4 col-xs-6">
-                                    <a href="{{ route('products.prod', $product->id) }}">
-                                    <div class="product">
-                                        <div class="product-img">
-                                            <img src="{{ asset('img/' . $product->image) }}" alt="">
-                                            <div class="product-label">
-                                                @if($product->discount)
-                                                    <span class="sale">-{{$product->discount}}%</span>
-                                                @endif
-                                                <!-- Checking if the product was created in the last 10 minutes -->
-                                                @if($product->created_at >= \Carbon\Carbon::now()->subMinutes(10))
-                                                    <span class="new">NEW</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="product-body">
-                                            <p class="product-category">{{ $product->category }}</p>
-                                            <h3 class="product-name"><a href="#">{{ $product->name }}</a></h3>
-                                            <h4 class="product-price">${{ $product->price }} <del class="product-old-price">${{ $product->old_price }}</del></h4>
-                                            <div class="product-rating">
-                                                <form action="{{ route('ratings.store', $product) }}" method="POST">
-                                                    @csrf
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <button type="submit" name="rating" value="{{ $i }}" class="star rating-button" title="Rate this {{ $i }} out of 5 stars">
-                                                            @if($product->averageRating() >= $i)
-                                                                <i class="fa fa-star"></i>
-                                                            @else
-                                                                <i class="fa fa-star-o"></i>
-                                                            @endif
-                                                        </button>
-                                                    @endfor
-                                                </form>
-                                            </div>
-
-                                            <div class="product-btns">
-                                                <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-                                                <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-                                                <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-                                            </div>
-                                        </div>
-                                        <div class="add-to-cart">
-                                            <button class="add-to-cart-btn" data-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                                        </div>
-                                    </div>
-                                    </a>
-                                </div>
-                            @endforeach
 						</div>
 						<!-- /store products -->
 
 						<!-- store bottom filter -->
 						<div class="store-filter clearfix">
-							<span class="store-qty">Showing 20-100 products</span>
+                            <span class="store-qty">Showing {{ sizeof($products) }} products</span>
 							<ul class="store-pagination">
 								<li class="active">1</li>
 								<li><a href="#">2</a></li>
@@ -384,12 +297,12 @@
     var priceSlider = document.getElementById('price-slider');
     if (priceSlider) {
         noUiSlider.create(priceSlider, {
-            start: [1, 999],
+            start: [{{ $minPrice }}, {{ $maxPrice }}],
             connect: true,
             step: 1,
             range: {
-                'min': 1,
-                'max': 999
+                'min': {{ $minPrice }},
+                'max': {{ $maxPrice }}
             }
         });
 
@@ -403,7 +316,7 @@
 
         function fetchProducts(minPrice, maxPrice) {
             $.ajax({
-                url: "{{ route('products.filter') }}",
+                url: "/fill",
                 type: "GET",
                 data: {
                     min_price: minPrice,
@@ -419,5 +332,37 @@
 
     }
 </script>
-	</body>
+        <script>
+            $(document).ready(function() {
+                let selectedCategories = [];
+
+                $('.category-checkbox').change(function() {
+                    let category = $(this).data('category');
+                    let isChecked = $(this).is(':checked');
+
+                    if (isChecked) {
+                        selectedCategories.push(category);
+                    } else {
+                        const index = selectedCategories.indexOf(category);
+                        if (index > -1) {
+                            selectedCategories.splice(index, 1);
+                        }
+                    }
+                });
+
+                $('#apply-filter').click(function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/products/filterByCategory',  // the route for filtering products
+                        data: {
+                            categories: selectedCategories
+                        },
+                        success: function(data) {
+                            $('#product-list').html(data);
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
 </html>

@@ -8,26 +8,38 @@
     <h1 class="text-center">Create Product</h1>
     <div class="card">
         <div class="card-body">
-            <form action="/prod" method="post" enctype="multipart/form-data">
+            <form action="{{ route('products.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
                     <div class="col-lg-6 form-group">
                         <label for="name">Name:</label>
                         <input type="text" id="name" name="name" class="form-control">
+                        @error('name')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="col-lg-6 form-group">
                         <label for="category">Category:</label>
                         <input type="text" id="category" name="category" class="form-control">
+                        @error('category')
+                        <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-6 form-group">
                         <label for="price">Price:</label>
-                        <input type="text" id="price" name="price" class="form-control">
+                        <input type="text" id="price" name="price" class="form-control @error('price') is-invalid @enderror">
+                        @error('price')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-lg-6 form-group">
                         <label for="old_price">Old Price:</label>
-                        <input type="text" id="old_price" name="old_price" class="form-control">
+                        <input type="text" id="old_price" name="old_price" class="form-control @error('old_price') is-invalid @enderror">
+                        @error('old_price')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
@@ -35,11 +47,14 @@
                     <div class="col-lg-6 form-group">
                         <label for="images">Images:</label>
                         <div class="" style="display: flex; height: 34px; border: 1px solid #211f1f; border-radius: 4px;">
-                            <input type="file" id="images" name="images[]" multiple style="display: none;">
+                            <input type="file" id="images" name="images[]" multiple style="display: none;" class="@error('images') is-invalid @enderror">
                             <label for="images" style="display: flex; align-items: center; padding-right: 5px;
                              padding-left:5px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; height: 100%;">Choose Files</label>
                             <span id="selected-files" style="margin-left: 10px; color: #211f1f; height: 100%; display: flex; align-items: center;"></span>
                         </div>
+                        @error('images')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
 
                         <script>
                             const fileInput = document.getElementById('images');
@@ -57,8 +72,11 @@
                         </script>
                     </div>
                     <div class="col-lg-6 form-group">
-                        <label for="description" >Description:</label>
-                        <textarea required id="description" name="description" class="form-control"></textarea>
+                        <label for="description">Description:</label>
+                        <textarea required id="description" name="description" class="form-control @error('description') is-invalid @enderror"></textarea>
+                        @error('description')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
                 <div class="row">

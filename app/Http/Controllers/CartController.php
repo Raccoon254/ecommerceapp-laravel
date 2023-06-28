@@ -62,6 +62,18 @@ class CartController extends Controller
         return Redirect::back();
     }
 
+    function calculateTotalAmount($cart): float|int
+    {
+        $totalAmount = 0;
+
+        foreach ($cart as $item) {
+            $totalAmount += $item['price'] * $item['quantity'];
+        }
+
+        return $totalAmount;
+    }
+
+
     public function decrement($productId): \Illuminate\Http\RedirectResponse
     {
         $cart = Session::get('cart', []);

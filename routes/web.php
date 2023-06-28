@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ProductReviews;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout', function () {
         return view('checkout');
     })->name('checkout.index');
+
+    Route::get('/products/{product}/reviews/create', [App\Http\Controllers\ProductReviews::class, 'create'])->name('review.create');
 
     Route::post('/products/{product}/ratings', [RatingController::class, 'store'])->name('ratings.store');
 });
@@ -61,7 +65,7 @@ Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index
 
 
 Route::get('/create', 'App\Http\Controllers\ProductController@create')->name('add.prod');
-Route::post('/prod', 'App\Http\Controllers\ProductController@store');
+Route::post('/prod', 'App\Http\Controllers\ProductController@store')->name('products.store');
 
 Route::get('/products/{id}/edit', 'App\Http\Controllers\ProductController@edit')->name('products.edit');
 Route::patch('/products/{id}', 'App\Http\Controllers\ProductController@update')->name('products.update');
@@ -87,4 +91,17 @@ Route::get('/account', function () {
     }
 })->name('account');
 
-Route::get('/products/filter/hdshfehszhdwahdwhaadhhdhdas', [App\Http\Controllers\ProductController::class, 'filter'])->name('products.filter');
+Route::get('/fill', [App\Http\Controllers\ProductController::class, 'filter'])->name('prod.sort');
+
+//Route::post('/products/{product}/reviews', [App\Http\Controllers\ProductReviews::class, 'store']);
+Route::post('/products/{product}/reviews', [App\Http\Controllers\ProductReviews::class, 'store'])->name('product_reviews.store');
+
+Route::get('/products/filterByCategory', [App\Http\Controllers\ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
+
+
+Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
+
+Route::get('/cart', 'App\Http\Controllers\CartController@index')->name('cart.index');
+
+Route::post('/cart/increment/{productId}', 'App\Http\Controllers\CartController@increment')->name('cart.increment');
+Route::post('/cart/decrement/{productId}', 'App\Http\Controllers\CartController@decrement')->name('cart.decrement');

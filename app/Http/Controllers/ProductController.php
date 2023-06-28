@@ -5,13 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $products = Product::with('images')->get();
-        return view('welcome', ['products' => $products]);
+
+        $maxPrice = Product::max('price');
+        $minPrice = Product::min('price');
+
+        $categories = Product::select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->get();
+
+        return view('welcome', ['products' => $products, 'categories' => $categories, 'maxPrice' => $maxPrice, 'minPrice' => $minPrice]);
     }
 
     //return a product by id in json format
@@ -21,27 +31,37 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function create(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorize('manage-products');
         return view('create');
     }
 
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $request->validate([
+
+        //dd($request->all());
+        // Validate the request
+        $validatedData = $request->validate([
             'name' => 'required',
             'category' => 'required',
             'price' => 'required',
             'old_price' => 'required',
             'description' => 'required',
             'images' => 'required',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5000',
         ]);
 
+        //dd($validatedData);
+
+        // Process the request and store the product
         $productData = $request->except('images');
 
-        if($request->hasFile('images')) {
+        if ($request->hasFile('images')) {
             $images = $request->file('images');
             $imageName = time() . '_0.' . $images[0]->extension();
             $images[0]->move(public_path('img'), $imageName);
@@ -50,7 +70,7 @@ class ProductController extends Controller
 
         $product = Product::create($productData);
 
-        if($request->hasFile('images')) {
+        if ($request->hasFile('images')) {
             $i = 1;
             foreach (array_slice($images, 1) as $image) {
                 $imageName = time() . '_' . $i++ . '.' . $image->extension();
@@ -59,7 +79,7 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('success', 'Product created successfully');
     }
 
     /**
@@ -118,17 +138,25 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function destroy($id): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('manage-products');
         $product = \App\Models\Product::findOrFail($id);
-
+        $product->productReviews()->delete();
         $product->delete();
 
-        return redirect()->route('products.index');
+        return redirect()->route('manage.products');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function editindex(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorize('manage-products');
         $products = Product::all();
 
         return view('manage', ['products' => $products]);
@@ -137,10 +165,17 @@ class ProductController extends Controller
     public function getProduct($productId): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $product = Product::with('images')->find($productId);
-        //dd($product);
         $sameCategoryProducts = Product::where('category', $product->category)->get();
 
-        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts]);
+        $reviews = $product->productReviews()->paginate(10);  // paginate reviews
+        $ratings = $product->ratings; // get ratings
+
+        $userRating = $product->ratings()->where('user_id', Auth::id())->first(); // get user rating
+        //dd($userRating->rating);
+
+        $reviewCount = $product->productReviews()->count();  // count the number of reviews
+
+        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts, 'reviews' => $reviews, 'ratings' => $ratings, 'reviewCount' => $reviewCount, 'userRating' => $userRating]);
     }
 
     public function filter(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
@@ -155,5 +190,15 @@ class ProductController extends Controller
         return view('product-list-partial', ['products' => $products]);
     }
 
+    public function filterByCategory(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    {
+        if ($request->has('categories') && count($request->categories) > 0) {
+            $products = Product::whereIn('category', $request->categories)->get();
+        } else {
+            $products = Product::all();
+        }
+
+        return view('product-list-partial', ['products' => $products]);
+    }
 
 }

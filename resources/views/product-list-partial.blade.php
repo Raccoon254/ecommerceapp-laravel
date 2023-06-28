@@ -1,3 +1,6 @@
+@if($products->isEmpty())
+    <h3 style="padding-left: 10px">No products found</h3>
+@else
 @foreach ($products as $product)
     <div class="col-md-4 col-xs-6">
         <a href="{{ route('products.prod', $product->id) }}">
@@ -46,3 +49,4 @@
         </a>
     </div>
 @endforeach
+@endif

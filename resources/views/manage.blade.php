@@ -5,6 +5,13 @@
 <body>
 <div class="container mt-5">
     <h1 class="text-center">Manage Products</h1>
+
+    @if ($products->isEmpty())
+        <div class="alert alert-warning">
+            <p>No products found </p>
+            <p>Please click <a href="{{ route('add.prod') }}">here</a> to add products</p>
+        </div>
+    @else
     <table class="table table-striped table-bordered table-responsive-sm">
         <thead class="thead-dark">
         <tr>
@@ -38,6 +45,7 @@
         @endforeach
         </tbody>
     </table>
+    @endif
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
