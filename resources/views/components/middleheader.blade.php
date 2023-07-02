@@ -29,7 +29,7 @@
                             </select>
                         </label>
                         <label>
-                            <input class="input header-w-full" placeholder="Search here">
+                            <input style="border-radius: 0!important;" class="input header-w-full" placeholder="Search here">
                         </label>
                         <button class="search-btn">Search</button>
                     </form>

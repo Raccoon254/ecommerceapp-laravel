@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminOrderReceived;
+use App\Mail\OrderReceived;
+use App\Mail\UserOrderReceived;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
@@ -102,23 +108,40 @@ class CartController extends Controller
     {
         $cart = $request->session()->get('cart', []);
 
-        // Create a simple email body with cart content
-        $email_body = "Checkout Details:\n\n";
-        foreach ($cart as $productId => $details) {
-            $email_body .= "Product ID: {$productId}, Name: {$details['name']}, Price: {$details['price']}, Quantity: {$details['quantity']}\n";
+        if (count($cart) == 0) {
+            return redirect()->back()->with('error', 'Your cart is empty. Please add some products before checking out.');
         }
 
-        // Send email using Laravel's Mailing feature
-        Mail::raw($email_body, function ($message) {
-            $message->to('tomsteve187@gmail.com')->subject('Checkout Details');
-        });
+        $user = Auth::user();
 
-        // Clear cart
+        $order = new Order();
+        $order->user_id = $user->id;
+        $order->status = 'Processing';
+        $order->delivery_location = $user->shippingDetails->address; // Assuming you have set up a relationship between user and shipping details
+        $order->total_price = $this->calculateTotalAmount($cart);
+        $order->order_number = 'ORD-' . strtoupper(uniqid()); // Generates a unique order number
+
+        $order->save();
+
+        foreach ($cart as $productId => $details) {
+            $order->products()->attach($productId, ['quantity' => $details['quantity'], 'price_at_the_time_of_purchase' => $details['price']]);
+        }
+
+        // Send email to the user
+        Mail::to($user->email)->send(new UserOrderReceived($order));
+
+        // Send email to all admins
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Mail::to($admin->email)->send(new AdminOrderReceived($order));
+        }
+
+        // Clear the cart
         $request->session()->forget('cart');
 
-        // Redirect back or to another page
-        return redirect()->back()->with('status', 'Checkout completed, email sent.');
+        return redirect()->back()->with('status', 'Order placed successfully. Check your email for details.');
     }
+
 
 }
 

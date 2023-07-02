@@ -162,16 +162,30 @@ class ProductController extends Controller
         return view('manage', ['products' => $products]);
     }
 
-    public function getProduct($productId): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    /**
+     * @throws \Exception
+     */
+    public function getProduct(Request $request): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application
     {
+        $productId = $request->input('id');
         $product = Product::with('images')->find($productId);
+
+        // Check if the product exists
+        if ($product === null) {
+            // Handle the case when the product does not exist, for example:
+            throw new \Exception('Product not found');
+        }
+
         $sameCategoryProducts = Product::where('category', $product->category)->get();
+        if ($sameCategoryProducts === null)
+        {
+            $sameCategoryProducts = []; // Initialized to an empty array
+        }
 
         $reviews = $product->productReviews()->paginate(10);  // paginate reviews
         $ratings = $product->ratings; // get ratings
 
         $userRating = $product->ratings()->where('user_id', Auth::id())->first(); // get user rating
-        //dd($userRating->rating);
 
         $reviewCount = $product->productReviews()->count();  // count the number of reviews
 

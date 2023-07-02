@@ -6,12 +6,14 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <script src="https://kit.fontawesome.com/af6aba113a.js" crossorigin="anonymous"></script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
@@ -29,7 +31,16 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+
+                    @if(isset($slot))
+                        {{ $slot }}
+                    @endif
+
+                    @yield('content')
+
+                    @if (Auth::check() && Auth::user()->isAdmin())
+                        @include('layouts.adminfooter')
+                    @endif
             </main>
         </div>
     </body>

@@ -9,21 +9,21 @@
                 <div class="newsletter">
                     <p>Sign Up for the <strong>NEWSLETTER</strong></p>
                     <form>
-                        <input class="input" type="email" placeholder="Enter Your Email">
+                        <input class="input rounded-full-l" type="email" placeholder="Enter Your Email">
                         <button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>
                     </form>
                     <ul class="newsletter-follow">
                         <li>
-                            <a href="#"><i class="fa fa-facebook"></i></a>
+                            <a class="rounded-3x" href="#"><i class="fa fa-facebook"></i></a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
+                            <a class="rounded-3x" href="#"><i class="fa fa-twitter"></i></a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
+                            <a class="rounded-3x" href="#"><i class="fa fa-instagram"></i></a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-pinterest"></i></a>
+                            <a class="rounded-3x" href="#"><i class="fa fa-pinterest"></i></a>
                         </li>
                     </ul>
                 </div>

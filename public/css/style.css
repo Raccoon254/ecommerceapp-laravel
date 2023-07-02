@@ -814,6 +814,23 @@ textarea.input {
   cursor: pointer;
 }
 
+.locked{
+    background: #1f2937 !important;
+    transition: 0.3s all;
+}
+
+.locked:hover{
+    background: #2b542c !important;
+}
+
+.scaled{
+    transition: 0.3s all;
+}
+
+.scaled:hover{
+    transform: scale(1.03);
+}
+
 .hot-deal {
   text-align: center;
 }
@@ -882,8 +899,8 @@ textarea.input {
 }
 
 .product:hover {
-  -webkit-box-shadow: 0px 0px 6px 0px #E4E7ED, 0px 0px 0px 2px #D10024;
-  box-shadow: 0px 0px 6px 0px #E4E7ED, 0px 0px 0px 2px #D10024;
+  -webkit-box-shadow: 0 0 6px 0 #E4E7ED, 0 0 0 2px #D10024;
+  box-shadow: 0 0 6px 0 #E4E7ED, 0 0 0 2px #D10024;
 }
 
 .product .product-img {
@@ -924,6 +941,22 @@ textarea.input {
   background-color: #FFF;
   text-align: center;
   z-index: 20;
+}
+
+.product-img>img{
+    border-radius: 8px 8px 0px 0px;
+}
+
+.product{
+    border-radius: 8px;
+}
+
+.product:hover{
+    border-radius: 8px 8px 0px 0px;
+}
+
+.product-body .product-body>* .add-to-cart{
+    border-radius: 0 0 10px 10px;
 }
 
 .product .product-body .product-category {
@@ -1891,9 +1924,15 @@ textarea.input {
   border-right: 1px solid #E4E7ED;
   border-left: 1px solid #E4E7ED;
   border-bottom: 1px solid #E4E7ED;
+    border-radius: 8px !important;
+}
+
+.h-45{
+    height: 45px !important;
 }
 
 .order-details:before {
+    border-radius: 8px !important;
   content: "";
   position: absolute;
   left: -1px;
@@ -2012,7 +2051,44 @@ textarea.input {
 }
 
 .newsletter .newsletter-follow li:last-child {
-  margin-right: 0px;
+  margin-right: 0;
+}
+
+.rounded-1x {
+  border-radius: 2px;
+}
+
+.rounded-2x {
+  border-radius: 4px;
+}
+
+.rounded-3x {
+  border-radius: 8px;
+}
+
+.rounded-4x {
+  border-radius: 16px;
+}
+
+.rounded-full-l{
+    border-radius: 32px 0 0 32px !important;
+}
+
+.w-full{
+    width: 100% !important;
+}
+
+.rounded-5x {
+  border-radius: 32px;
+}
+
+.text-link:hover {
+  color: #D10024;
+    font-weight: 700;
+}
+
+input, textarea{
+    border-radius: 8px !important;
 }
 
 .newsletter .newsletter-follow li a {

@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductReviews;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ShippingDetailsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
@@ -24,10 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    //Route to check out page return view
-    Route::get('/checkout', function () {
-        return view('checkout');
-    })->name('checkout.index');
+    Route::get('/checkout', [ShippingDetailsController::class, 'index'])->name('checkout.index');
 
     Route::get('/products/{product}/reviews/create', [App\Http\Controllers\ProductReviews::class, 'create'])->name('review.create');
 
@@ -78,7 +78,7 @@ Route::get('/prod/id', function (){
     return view('product');
 });
 
-Route::get('/getProduct/{productId}', [\App\Http\Controllers\ProductController::class, 'getProduct'])->name('products.prod');
+Route::get('/getProduct', [\App\Http\Controllers\ProductController::class, 'getProduct'])->name('products.prod');
 
 Route::get('/account', function () {
     // Check if user is logged in
@@ -98,10 +98,24 @@ Route::post('/products/{product}/reviews', [App\Http\Controllers\ProductReviews:
 
 Route::get('/products/filterByCategory', [App\Http\Controllers\ProductController::class, 'filterByCategory'])->name('products.filterByCategory');
 
-
 Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
 
 Route::get('/cart', 'App\Http\Controllers\CartController@index')->name('cart.index');
 
 Route::post('/cart/increment/{productId}', 'App\Http\Controllers\CartController@increment')->name('cart.increment');
 Route::post('/cart/decrement/{productId}', 'App\Http\Controllers\CartController@decrement')->name('cart.decrement');
+
+Route::post('/shipping-details', [ShippingDetailsController::class, 'store'])->name('shipping-details.store');
+
+Route::put('/shipping-details/{shippingDetail}', [ShippingDetailsController::class, 'update'])->name('shipping-details.update');
+
+Route::post('checkout', [CartController::class, 'checkout'])->name('checkout');
+
+Route::middleware(['auth', 'can:manage-products'])->group(function () {
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::put('orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+
+});
+
+

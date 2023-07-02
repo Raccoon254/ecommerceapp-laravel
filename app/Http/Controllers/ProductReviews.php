@@ -35,7 +35,7 @@ class ProductReviews extends Controller
         app(RatingController::class)->store($request, $product);
 
         // Redirect back
-        return redirect()->route('products.prod', ['productId' => $product->id]);
+        return redirect()->route('products.prod', ['id' => $product->id]);
     }
 
 }
