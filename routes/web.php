@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductReviews;
 use App\Http\Controllers\ProfileController;
@@ -101,6 +102,7 @@ Route::get('/products/filterByCategory', [App\Http\Controllers\ProductController
 Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
 
 Route::get('/cart', 'App\Http\Controllers\CartController@index')->name('cart.index');
+Route::post('/cart', 'App\Http\Controllers\CartController@clear')->name('cart.clear');
 
 Route::post('/cart/increment/{productId}', 'App\Http\Controllers\CartController@increment')->name('cart.increment');
 Route::post('/cart/decrement/{productId}', 'App\Http\Controllers\CartController@decrement')->name('cart.decrement');
@@ -115,7 +117,13 @@ Route::middleware(['auth', 'can:manage-products'])->group(function () {
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::put('orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('/create-category', [CategoryController::class, 'create'])->name('categories.create');
+
 
 });
 
+Route::get('/category', [CategoryController::class, 'show'])->name('category.show');
+Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 
+Route::get('/category/{id}/products', [ProductController::class, 'getProductsByCategory'])->name('category.products');

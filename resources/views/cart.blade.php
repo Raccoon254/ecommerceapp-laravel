@@ -49,8 +49,16 @@
         @endforeach
         </tbody>
     </table>
-    <p>Total Amount: {{ $totalAmount }}</p>
+    <p class="w-full center">Total Amount: {{ $totalAmount }}</p>
+    <div class="d-flex px-2 w-full center gap-2">
+        <a href="{{ route('cart.clear') }}" class="btn center flex gap-2 btn-danger"><i class="fa-solid fa-trash"></i>Clear Cart</a>
+        <a href="{{ route('checkout') }}" class="btn flex center gap-2 btn-success"><i class="fa-solid fa-bag-shopping"></i>Checkout</a>
+        <a href="{{ route('cart.index') }}" class="btn flex center gap-2 btn-primary"><i class="fa-solid fa-rotate-right"></i>Refresh</a>
+    </div>
 </div>
+
+<!-- /BREADCRUMB -->
+@include('components.footer')
 
 </body>
 </html>

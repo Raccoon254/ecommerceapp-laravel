@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     <div class="product-body">
-                        <p class="product-category">{{ $product->category }}</p>
+                        <p class="product-category"><small>{{ $product->category->name }}</small></p>
                         <h3 class="product-name"><a href="#">{{ $product->name }}</a></h3>
                         <h4 class="product-price">${{ $product->price }} <del class="product-old-price">${{ $product->old_price }}</del></h4>
                         <div class="product-rating">

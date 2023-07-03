@@ -16,12 +16,18 @@ class Product extends Model
      */
     protected $fillable = [
         'name',
-        'category',
+        'category_id',
         'price',
         'old_price',
         'image',
         'description',
     ];
+
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id'); // updated this line
+    }
+
 
     public function images(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
@@ -36,6 +42,11 @@ class Product extends Model
     public function averageRating()
     {
         return $this->ratings()->avg('rating');
+    }
+
+    public function orders(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Order::class);
     }
 
     public function productReviews(): \Illuminate\Database\Eloquent\Relations\HasMany

@@ -14,7 +14,7 @@
 
 		@include('components.navbar')
 
-		<!-- BREADCRUMB -->
+		{{--<!-- BREADCRUMB -->
 		<div id="breadcrumb" class="section">
 			<!-- container -->
 			<div class="container">
@@ -33,7 +33,7 @@
 			</div>
 			<!-- /container -->
 		</div>
-		<!-- /BREADCRUMB -->
+		<!-- /BREADCRUMB -->--}}
 
 		<!-- SECTION -->
 		<div class="section">
@@ -48,23 +48,13 @@
                             <h3 class="aside-title">Categories</h3>
                             <!-- Category Filter -->
                             <div class="checkbox-filter">
-                                <ul>
-                                    @foreach($categories as $category)
-                                        <li>
-                                            <input type="checkbox" id="category-{{ $category->id }}" class="category-checkbox" data-category="{{ $category->category }}">
-                                            <label for="category-{{ $category->id }}">
-                                                <span></span>
-                                                {{ $category->category }}
-                                                <small>({{ $category->total }})</small>
-                                            </label>
-                                        </li>
-                                    @endforeach
-                                </ul>
+                                @include('components.category-filter')
                             </div>
 
                             <button id="apply-filter">Apply</button>
                             <!-- /Category Filter -->
                         </div>
+
                         <!-- /aside Widget -->
 
                         <!-- aside Widget -->
@@ -87,7 +77,7 @@
 						</div>
 						<!-- /aside Widget -->
 
-						<!-- aside Widget -->
+						{{--<!-- aside Widget -->
 						<div class="aside">
 							<h3 class="aside-title">Brand</h3>
 							<div class="checkbox-filter">
@@ -141,46 +131,12 @@
 								</div>
 							</div>
 						</div>
-						<!-- /aside Widget -->
+						<!-- /aside Widget -->--}}
 
 						<!-- aside Widget -->
 						<div class="aside">
 							<h3 class="aside-title">Top selling</h3>
-							<div class="product-widget">
-								<div class="product-img">
-									{{-- <img src="./img/product01.png" alt=""> --}}
-									<img src="{{ asset('img/product01.png') }}" alt="">
-								</div>
-								<div class="product-body">
-									<p class="product-category">Category</p>
-									<h3 class="product-name"><a href="#">product name goes here</a></h3>
-									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								</div>
-							</div>
-
-							<div class="product-widget">
-								<div class="product-img">
-									{{-- <img src="./img/product02.png" alt=""> --}}
-									<img src="{{ asset('img/product02.png') }}" alt="">
-								</div>
-								<div class="product-body">
-									<p class="product-category">Category</p>
-									<h3 class="product-name"><a href="#">product name goes here</a></h3>
-									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								</div>
-							</div>
-
-							<div class="product-widget">
-								<div class="product-img">
-									{{-- <img src="./img/product03.png" alt=""> --}}
-									<img src="{{ asset('img/product03.png') }}" alt="">
-								</div>
-								<div class="product-body">
-									<p class="product-category">Category</p>
-									<h3 class="product-name"><a href="#">product name goes here</a></h3>
-									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								</div>
-							</div>
+							@include('components.top-selling')
 						</div>
 						<!-- /aside Widget -->
 					</div>
@@ -193,7 +149,7 @@
 							<div class="store-sort">
 								<label>
 									Sort By:
-									<select class="input-select">
+									<select class="input-select rounded-3x">
 										<option value="0">Popular</option>
 										<option value="1">Position</option>
 									</select>
@@ -201,15 +157,15 @@
 
 								<label>
 									Show:
-									<select class="input-select">
+									<select class="input-select rounded-3x">
 										<option value="0">20</option>
 										<option value="1">50</option>
 									</select>
 								</label>
 							</div>
 							<ul class="store-grid">
-								<li class="active"><i class="fa fa-th"></i></li>
-								<li><a href="#"><i class="fa fa-th-list"></i></a></li>
+								<li class="active rounded-3x"><i class="fa fa-th"></i></li>
+								<li class="rounded-3x"><a href="#"><i class="fa fa-th-list"></i></a></li>
 							</ul>
 						</div>
 						<!-- /store top filter -->
@@ -226,11 +182,11 @@
 						<div class="store-filter clearfix">
                             <span class="store-qty">Showing {{ sizeof($products) }} products</span>
 							<ul class="store-pagination">
-								<li class="active">1</li>
-								<li><a href="#">2</a></li>
-								<li><a href="#">3</a></li>
-								<li><a href="#">4</a></li>
-								<li><a href="#"><i class="fa fa-angle-right"></i></a></li>
+								<li class="active rounded-3x">1</li>
+								<li class="rounded-3x"><a href="#">2</a></li>
+								<li class="rounded-3x"><a href="#">3</a></li>
+								<li class="rounded-3x"><a href="#">4</a></li>
+								<li class="rounded-3x"><a href="#"><i class="fa fa-angle-right"></i></a></li>
 							</ul>
 						</div>
 						<!-- /store bottom filter -->
@@ -334,18 +290,18 @@
 </script>
         <script>
             $(document).ready(function() {
-                let selectedCategories = [];
+                let selectedCategoryIds = [];
 
                 $('.category-checkbox').change(function() {
-                    let category = $(this).data('category');
+                    let categoryId = $(this).data('category-id');
                     let isChecked = $(this).is(':checked');
 
                     if (isChecked) {
-                        selectedCategories.push(category);
+                        selectedCategoryIds.push(categoryId);
                     } else {
-                        const index = selectedCategories.indexOf(category);
+                        const index = selectedCategoryIds.indexOf(categoryId);
                         if (index > -1) {
-                            selectedCategories.splice(index, 1);
+                            selectedCategoryIds.splice(index, 1);
                         }
                     }
                 });
@@ -355,7 +311,7 @@
                         type: 'GET',
                         url: '/products/filterByCategory',  // the route for filtering products
                         data: {
-                            categories: selectedCategories
+                            categories: selectedCategoryIds
                         },
                         success: function(data) {
                             $('#product-list').html(data);

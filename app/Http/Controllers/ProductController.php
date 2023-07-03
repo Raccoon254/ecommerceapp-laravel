@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -17,12 +18,65 @@ class ProductController extends Controller
         $maxPrice = Product::max('price');
         $minPrice = Product::min('price');
 
-        $categories = Product::select('category', DB::raw('count(*) as total'))
-            ->groupBy('category')
+        $categories = Category::all();  // Fetch all categories from Category model
+
+        $topSellingProducts = Product::withCount('orders')
+            ->orderBy('orders_count', 'desc')
+            ->take(3)
             ->get();
 
-        return view('welcome', ['products' => $products, 'categories' => $categories, 'maxPrice' => $maxPrice, 'minPrice' => $minPrice]);
+
+        return view('welcome', ['products' => $products, 'categories' => $categories, 'maxPrice' => $maxPrice, 'minPrice' => $minPrice, 'topSellingProducts' => $topSellingProducts]);
     }
+
+    public function getProductsByCategory($id): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    {
+        // Fetch all products in the category
+        $products = Product::where('category_id', $id)->get();
+
+        // Return a view with the products data
+        return view('product-list-partial', ['products' => $products]);
+    }
+
+
+    public function search(Request $request)
+    {
+        // Define an empty collection to store all matched products
+        $allProducts = collect();
+
+        if ($request->has('category') && $request->category != 0) {
+            $categoryProducts = Product::where('category_id', $request->category)->get();
+            $allProducts = $allProducts->concat($categoryProducts);
+        }
+
+        if ($request->has('search') && $request->search !== '') {
+            //validate the request it should be a string without any special characters if not return error
+            // Check if a category with the same name exists
+            $category = Category::where('name', 'LIKE', '%' . $request->search . '%')->first();
+
+            if ($category) {
+                // If it exists, get all products in that category
+                $categoryProducts = Product::where('category_id', $category->id)->get();
+                $allProducts = $allProducts->concat($categoryProducts);
+            }
+
+            // Search by name and description regardless of the category result
+            $searchProducts = Product::where('name', 'LIKE', '%' . $request->search . '%')
+                ->orWhere('description', 'LIKE', '%' . $request->search . '%')
+                ->get();
+            $allProducts = $allProducts->concat($searchProducts);
+        }
+
+        // Remove duplicates (products that were found by both category and name/description)
+        // And sort the collection so that products with a direct name match come first
+        $products = $allProducts->unique('id')->sortByDesc(function($product) use ($request) {
+            return strpos($product->name, $request->search) !== false ? 1 : 0;
+        });
+
+        return view('product-list-partial', ['products' => $products]);
+    }
+
+
 
     //return a product by id in json format
     public function product($id): \Illuminate\Http\JsonResponse
@@ -37,7 +91,8 @@ class ProductController extends Controller
     public function create(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('manage-products');
-        return view('create');
+        $categories = Category::all();
+        return view('create', ['categories' => $categories]);
     }
 
 
@@ -48,13 +103,14 @@ class ProductController extends Controller
         // Validate the request
         $validatedData = $request->validate([
             'name' => 'required',
-            'category' => 'required',
+            'category_id' => 'required|exists:categories,id',  // Update to category_id
             'price' => 'required',
             'old_price' => 'required',
             'description' => 'required',
             'images' => 'required',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5000',
         ]);
+
 
         //dd($validatedData);
 
@@ -103,7 +159,7 @@ class ProductController extends Controller
 
         $request->validate([
             'name' => 'sometimes',
-            'category' => 'sometimes',
+            'category_id' => 'sometimes|exists:categories,id', // Update to category_id
             'price' => 'sometimes',
             'old_price' => 'sometimes',
             'description' => 'sometimes',
@@ -145,11 +201,16 @@ class ProductController extends Controller
     {
         $this->authorize('manage-products');
         $product = \App\Models\Product::findOrFail($id);
+
+        // Manually delete associated records in order_product table
+        DB::table('order_product')->where('product_id', $id)->delete();
+
         $product->productReviews()->delete();
         $product->delete();
 
         return redirect()->route('manage.products');
     }
+
 
     /**
      * @throws AuthorizationException
@@ -176,7 +237,7 @@ class ProductController extends Controller
             throw new \Exception('Product not found');
         }
 
-        $sameCategoryProducts = Product::where('category', $product->category)->get();
+        $sameCategoryProducts = Product::where('category_id', $product->category_id)->get();  // Update to category_id
         if ($sameCategoryProducts === null)
         {
             $sameCategoryProducts = []; // Initialized to an empty array
@@ -189,7 +250,9 @@ class ProductController extends Controller
 
         $reviewCount = $product->productReviews()->count();  // count the number of reviews
 
-        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts, 'reviews' => $reviews, 'ratings' => $ratings, 'reviewCount' => $reviewCount, 'userRating' => $userRating]);
+        $categories = Category::all();
+
+        return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts, 'reviews' => $reviews, 'ratings' => $ratings, 'reviewCount' => $reviewCount, 'userRating' => $userRating, 'categories' => $categories]);
     }
 
     public function filter(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
@@ -207,7 +270,7 @@ class ProductController extends Controller
     public function filterByCategory(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         if ($request->has('categories') && count($request->categories) > 0) {
-            $products = Product::whereIn('category', $request->categories)->get();
+            $products = Product::whereIn('category_id', $request->categories)->get();  // Update to category_id
         } else {
             $products = Product::all();
         }

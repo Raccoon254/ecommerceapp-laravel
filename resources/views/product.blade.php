@@ -18,7 +18,7 @@
 						<ul class="breadcrumb-tree">
 							<li><a href="#">Home</a></li>
 							<li><a href="#">All Categories</a></li>
-							<li><a href="#">{{ $product->category }}</a></li>
+							<li><a href="#">{{ $product->category->name }}</a></li>
 							<li class="active">{{$product->name}}</li>
 						</ul>
 					</div>
@@ -308,7 +308,7 @@
                                         </div>
                                     </div>
                                     <div class="product-body">
-                                        <p class="product-category">{{ $sameCategoryProduct->category }}</p>
+                                        <p class="product-category">{{ $sameCategoryProduct->category->name }}</p>
                                         <h3 class="product-name"><a href="#">{{ $sameCategoryProduct->name }}</a></h3>
                                         <h4 class="product-price">${{ $sameCategoryProduct->price }} <del class="product-old-price">${{ $sameCategoryProduct->old_price }}</del></h4>
                                         <div class="product-rating">

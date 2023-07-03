@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\ShippingDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +24,10 @@ class ShippingDetailsController extends Controller
         $cart = $request->session()->get('cart', []);
         $totalAmount = $this->calculateTotalAmount($cart);
 
+        $categories = Category::all();
+
         // Return the view with the shipping details and cart
-        return view('checkout', compact('shippingDetails', 'cart', 'totalAmount'));
+        return view('checkout', compact('shippingDetails', 'cart', 'totalAmount', 'categories'));
     }
 
 

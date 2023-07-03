@@ -15,12 +15,17 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <x-input-label for="category" value="Category" />
-                        <x-text-input id="category" type="text" name="category" class="w-full" />
-                        @error('category')
+                        <x-input-label for="category_id" value="Category" />
+                        <label for="category_id"></label><select id="category_id" name="category_id" class="select select-secondary w-full mt-2 p-2 flex items form-control">
+                            @foreach($categories as $category)
+                                <option class="mt-2" value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('category_id')
                         <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="form-group">
                         <x-input-label for="price" value="Price" />
                         <x-text-input id="price" type="text" name="price" class="w-full" />

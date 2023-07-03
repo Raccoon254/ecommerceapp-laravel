@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\AdminOrderReceived;
 use App\Mail\OrderReceived;
 use App\Mail\UserOrderReceived;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -46,11 +47,13 @@ class CartController extends Controller
 
 
 
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $cart = $request->session()->get('cart', []);
+        $categories = Category::all();  // Fetch all categories from Category model
 
-        return view('cart', compact('cart'));
+
+        return view('cart', compact('cart', 'categories'));
     }
 
     public function data(): \Illuminate\Http\JsonResponse

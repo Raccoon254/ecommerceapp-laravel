@@ -6,13 +6,12 @@
         <div id="responsive-nav">
             <!-- NAV -->
             <ul class="main-nav nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="#">Hot Deals</a></li>
-                <li><a href="#">Categories</a></li>
-                <li><a href="#">Laptops</a></li>
-                <li><a href="#">Smartphones</a></li>
-                <li><a href="#">Cameras</a></li>
-                <li><a href="#">Accessories</a></li>
+                @foreach($categories as $category)
+                        <?php $firstName = explode(" ", $category->name)[0]; ?>
+                    <li>
+                        <a href="#" class="category-link" data-category-id="{{ $category->id }}">{{ $firstName }}</a>
+                    </li>
+                @endforeach
             </ul>
             <!-- /NAV -->
         </div>
@@ -21,3 +20,26 @@
     <!-- /container -->
 </nav>
 <!-- /NAVIGATION -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.category-link').on('click', function(e){
+            e.preventDefault();
+
+            // get the category id from the data attribute
+            var categoryId = $(this).data('category-id');
+
+            $.ajax({
+                url: '/category/' + categoryId + '/products',
+                method: 'GET',
+                success: function(data){
+                    $('#product-list').html(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        });
+    });
+</script>
+

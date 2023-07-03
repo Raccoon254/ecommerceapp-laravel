@@ -20,18 +20,21 @@
             <!-- SEARCH BAR -->
             <div class="col-md-6">
                 <div class="header-search">
-                    <form class="flex">
-                        <label>
-                            <select class="input-select">
+                    <form class="flex" id="search-form" action="{{ route('products.search') }}" method="GET">
+                        @csrf
+                    <label>
+                            <select class="input-select" name="category">
                                 <option value="0">All Categories</option>
-                                <option value="1">Category 01</option>
-                                <option value="1">Category 02</option>
+                                @foreach($categories as $category)
+                                        <?php $firstName = explode(" ", $category->name)[0]; ?>
+                                    <option value="{{ $category->id }}">{{ $firstName }}</option>
+                                @endforeach
                             </select>
                         </label>
                         <label>
-                            <input style="border-radius: 0!important;" class="input header-w-full" placeholder="Search here">
+                            <input style="border-radius: 0!important;" id="search-input" class="input header-w-full" name="search" placeholder="Search here">
                         </label>
-                        <button class="search-btn">Search</button>
+                        <button type="submit" class="search-btn">Search</button>
                     </form>
                 </div>
             </div>
@@ -110,3 +113,54 @@
     <!-- container -->
 </div>
 <!-- /MAIN HEADER -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        var delay = (function(){
+            var timer = 0;
+            return function(callback, ms){
+                clearTimeout(timer);
+                timer = setTimeout(callback, ms);
+            };
+        })();
+
+        // Function to perform AJAX request
+        var doAjaxSearch = function() {
+            $.ajax({
+                url: $('#search-form').attr('action'),
+                method: 'GET',
+                data: $('#search-form').serialize(),
+                success: function(data){
+                    $('#product-list').html(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        };
+
+        // Search on input
+        $('#search-input').on('input', function(e){
+            e.preventDefault();
+
+            delay(function(){
+                doAjaxSearch();
+            }, 100);
+        });
+
+        // Search on category change
+        $('select[name="category"]').on('change', function(e) {
+            e.preventDefault();
+
+            doAjaxSearch();
+        });
+
+        // Search on form submit
+        $('#search-form').on('submit', function(e) {
+            e.preventDefault();
+
+            doAjaxSearch();
+        });
+    });
+</script>
+
