@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function index(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $products = Product::with('images')->get();
+        //$products = Product::with('images')->get();
+        $products = Product::with('images')->paginate(9);
 
         $maxPrice = Product::max('price');
         $minPrice = Product::min('price');
@@ -29,7 +33,7 @@ class ProductController extends Controller
         return view('welcome', ['products' => $products, 'categories' => $categories, 'maxPrice' => $maxPrice, 'minPrice' => $minPrice, 'topSellingProducts' => $topSellingProducts]);
     }
 
-    public function getProductsByCategory($id): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function getProductsByCategory($id): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         // Fetch all products in the category
         $products = Product::where('category_id', $id)->get();
@@ -88,7 +92,7 @@ class ProductController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function create(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function create(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('manage-products');
         $categories = Category::all();
@@ -200,7 +204,7 @@ class ProductController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function edit($id): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function edit($id): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('manage-products');
         $product = Product::with('productData')->findOrFail($id);
@@ -331,7 +335,7 @@ class ProductController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function editindex(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function editindex(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('manage-products');
         $products = Product::all();
@@ -343,7 +347,7 @@ class ProductController extends Controller
     /**
      * @throws \Exception
      */
-    public function getProduct(Request $request): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application
+    public function getProduct(Request $request): \Illuminate\Contracts\Foundation\Application|Factory|View|Application
     {
         $productId = $request->input('id');
         //$product = Product::with('images')->find($productId);
@@ -373,7 +377,7 @@ class ProductController extends Controller
         return view('product', ['product' => $product, 'sameCategoryProducts' => $sameCategoryProducts, 'reviews' => $reviews, 'ratings' => $ratings, 'reviewCount' => $reviewCount, 'userRating' => $userRating, 'categories' => $categories]);
     }
 
-    public function filter(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function filter(Request $request): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         $minPrice = $request->input('min_price');
         $maxPrice = $request->input('max_price');
@@ -385,7 +389,7 @@ class ProductController extends Controller
         return view('product-list-partial', ['products' => $products]);
     }
 
-    public function filterByCategory(Request $request): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function filterByCategory(Request $request): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         if ($request->has('categories') && count($request->categories) > 0) {
             $products = Product::whereIn('category_id', $request->categories)->get();  // Update to category_id
