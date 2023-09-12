@@ -17,7 +17,7 @@ class ProductController extends Controller
     public function index(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         //$products = Product::with('images')->get();
-        $products = Product::with('images')->paginate(9);
+        $products = Product::with('images')->paginate(12);
 
         $maxPrice = Product::max('price');
         $minPrice = Product::min('price');
