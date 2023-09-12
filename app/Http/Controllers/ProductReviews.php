@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\Category;
 
 class ProductReviews extends Controller
 {
@@ -11,9 +12,9 @@ class ProductReviews extends Controller
     {
         // Get any existing review by the current user
         $review = $product->productReviews()->where('user_id', auth()->id())->first();
-
+		$categories = Category::all();
         // Return the view for creating a review
-        return view('reviews.create', ['product' => $product, 'review' => $review]);
+        return view('reviews.create', ['product' => $product, 'review' => $review, 'categories' => $categories]);
     }
 
     public function store(Request $request, Product $product): \Illuminate\Http\RedirectResponse

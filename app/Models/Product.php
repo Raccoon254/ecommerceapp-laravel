@@ -23,6 +23,11 @@ class Product extends Model
         'description',
     ];
 
+    public function productData(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ProductData::class);
+    }
+
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id'); // updated this line

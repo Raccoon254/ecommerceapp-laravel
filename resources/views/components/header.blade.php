@@ -27,7 +27,7 @@
                 $title = 'Manage Products';
                 break;
             default:
-                $title = 'Electro - HTML Ecommerce Template';
+                $title = 'Spare Realm™️';
         }
     @endphp
     <meta charset="utf-8">

@@ -96,7 +96,7 @@ class ProductController extends Controller
     }
 
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+/*    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
 
         //dd($request->all());
@@ -136,7 +136,66 @@ class ProductController extends Controller
         }
 
         return redirect()->route('products.index')->with('success', 'Product created successfully');
+    }*/
+
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric',
+            'old_price' => 'required|numeric',
+            'description' => 'required|string',
+            'images' => 'required',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5000',
+            'size' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
+            'car_model_name' => 'nullable|string|max:255',
+            'weight' => 'nullable|numeric',
+            'part_number' => 'nullable|string|max:255',
+            'manufacturer' => 'nullable|string|max:255',
+            'compatibility' => 'nullable|string|max:255',
+            'material' => 'nullable|string|max:255',
+        ]);
+
+        try {
+
+            // Process the request and store the product
+            $productData = $request->except('images', 'size', 'color', 'car_model_name', 'weight', 'part_number', 'manufacturer', 'compatibility', 'material');
+
+            if ($request->hasFile('images')) {
+                $images = $request->file('images');
+                $imageName = time() . '_0.' . $images[0]->extension();
+                $images[0]->move(public_path('img'), $imageName);
+                $productData['image'] = $imageName;
+            }
+
+            $product = Product::create($productData);
+
+            // Create the associated ProductData record
+            $productDataDetails = $request->only('size', 'color', 'car_model_name', 'weight', 'part_number', 'manufacturer', 'compatibility', 'material');
+            $product->productData()->create($productDataDetails);
+
+            if ($request->hasFile('images')) {
+                $i = 1;
+                foreach (array_slice($images, 1) as $image) {
+                    $imageName = time() . '_' . $i++ . '.' . $image->extension();
+                    $image->move(public_path('img'), $imageName);
+                    $product->images()->create(['filename' => $imageName]);
+                }
+            }
+
+                return redirect()->route('products.index')
+                    ->with('success', 'Product created successfully');
+
+                } catch (\Exception $e) {
+            return redirect()->back()
+            ->withErrors(['exception' => $e->getMessage()])
+            ->withInput();
+        }
     }
+
 
     /**
      * @throws AuthorizationException
@@ -144,15 +203,16 @@ class ProductController extends Controller
     public function edit($id): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('manage-products');
-        $product = Product::findOrFail($id);
+        $product = Product::with('productData')->findOrFail($id);
+        $categories = Category::all();
 
-        return view('edit', ['product' => $product]);
+        return view('edit', ['product' => $product, 'categories'=>$categories]);
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
+    /*public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('manage-products');
         $product = Product::findOrFail($id);
@@ -192,7 +252,63 @@ class ProductController extends Controller
         $product->update($productData);
 
         return redirect()->route('products.index');
+    }*/
+    public function update(Request $request, $id): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('manage-products');
+        $product = Product::findOrFail($id);
+
+        $request->validate([
+            'name' => 'sometimes',
+            'category_id' => 'sometimes|exists:categories,id',
+            'price' => 'sometimes',
+            'old_price' => 'sometimes',
+            'description' => 'sometimes',
+            'images' => 'nullable',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'size' => 'sometimes',
+            'color' => 'sometimes',
+            'car_model_name' => 'sometimes',
+            'weight' => 'sometimes',
+            'part_number' => 'sometimes',
+            'manufacturer' => 'sometimes',
+            'compatibility' => 'sometimes',
+            'material' => 'sometimes',
+        ]);
+
+        if(!($request->filled('name') || $request->filled('category_id') || $request->filled('price') || $request->filled('old_price') || $request->filled('description') || $request->filled('size') || $request->filled('color') || $request->filled('car_model_name') || $request->filled('weight') || $request->filled('part_number') || $request->filled('manufacturer') || $request->filled('compatibility') || $request->filled('material') || $request->hasFile('images'))) {
+            return back()->withErrors(['error' => 'At least one field must be filled to update.']);
+        }
+
+        $productData = $request->except(['images', 'size', 'color', 'car_model_name', 'weight', 'part_number', 'manufacturer', 'compatibility', 'material']);
+
+        if($request->hasFile('images')) {
+            $images = $request->file('images');
+            $imageName = time() . '_0.' . $images[0]->extension();
+            $images[0]->move(public_path('img'), $imageName);
+            $productData['image'] = $imageName;
+
+            $product->images()->delete();
+
+            $i = 1;
+            foreach (array_slice($images, 1) as $image) {
+                $imageName = time() . '_' . $i++ . '.' . $image->extension();
+                $image->move(public_path('img'), $imageName);
+                $product->images()->create(['filename' => $imageName]);
+            }
+        }
+
+        $product->update($productData);
+
+        if($product->productData) {
+            $product->productData->update($request->only(['size', 'color', 'car_model_name', 'weight', 'part_number', 'manufacturer', 'compatibility', 'material']));
+        } else {
+            $product->productData()->create($request->only(['size', 'color', 'car_model_name', 'weight', 'part_number', 'manufacturer', 'compatibility', 'material']));
+        }
+
+        return redirect()->route('products.index');
     }
+
 
     /**
      * @throws AuthorizationException
@@ -219,8 +335,9 @@ class ProductController extends Controller
     {
         $this->authorize('manage-products');
         $products = Product::all();
+    	$categories = Category::all();
 
-        return view('manage', ['products' => $products]);
+        return view('manage', ['products' => $products, 'categories' => $categories]);
     }
 
     /**
@@ -229,7 +346,8 @@ class ProductController extends Controller
     public function getProduct(Request $request): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application
     {
         $productId = $request->input('id');
-        $product = Product::with('images')->find($productId);
+        //$product = Product::with('images')->find($productId);
+        $product = Product::with(['images', 'productData'])->find($productId);
 
         // Check if the product exists
         if ($product === null) {

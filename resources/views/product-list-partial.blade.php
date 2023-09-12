@@ -6,7 +6,8 @@
             <a href="{{ route('products.prod', ['id' => $product->id]) }}">
                 <div class="product">
                     <div class="product-img">
-                        <img src="{{ asset('img/' . $product->image) }}" alt="">
+                        <img src="{{ filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('img/' . $product->image) }}" alt="">
+
                         <div class="product-label">
                             @if($product->discount)
                                 <span class="sale">-{{$product->discount}}%</span>

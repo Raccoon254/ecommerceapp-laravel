@@ -15,11 +15,11 @@
     <table class="table table-striped table-bordered table-responsive-sm">
         <thead class="thead-dark">
         <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
+            <th width="50px">Name</th>
+            <th width="50px">Category</th>
+            <th width="50xp">Price</th>
             <th>Old Price</th>
-            <th>Description</th>
+            <th width="300px">Description</th>
             <th>Image</th>
             <th>Actions</th>
         </tr>
@@ -28,7 +28,7 @@
         @foreach ($products as $product)
             <tr>
                 <td>{{ $product->name }}</td>
-                <td>{{ $product->category }}</td>
+                <td>{{ $product->category->name }}</td>
                 <td>{{ $product->price }}</td>
                 <td>{{ $product->old_price }}</td>
                 <td width="100px">{{ $product->description }}</td>

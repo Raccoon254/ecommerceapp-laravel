@@ -1,4 +1,3 @@
-
 <!-- NEWSLETTER -->
 <div id="newsletter" class="section">
     <!-- container -->
@@ -47,12 +46,12 @@
                     <div class="footer">
                         <h3 class="footer-title">About Us</h3>
                         <p>
-                            {{ env('app_description') }}
+                            {{ config('app.app_description') }}
                         </p>
                         <ul class="footer-links">
-                            <li><a href="#"><i class="fa fa-map-marker"></i>{{ env('app_address') }}</a></li>
-                            <li><a href="#"><i class="fa fa-phone"></i>{{ env('app_contact') }}</a></li>
-                            <li><a href="#"><i class="fa fa-envelope-o"></i>{{ env('app_email') }}</a></li>
+                            <li><a href="#"><i class="fa fa-map-marker"></i>{{ config('app.address') }}</a></li>
+                            <li><a href="#"><i class="fa fa-phone"></i>{{ config('app.contact') }}</a></li>
+                            <li><a href="#"><i class="fa fa-envelope-o"></i>{{  config('app.email') }}</a></li>
                         </ul>
                     </div>
                 </div>
