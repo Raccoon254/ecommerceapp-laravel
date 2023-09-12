@@ -37,7 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__ . '/auth.php';
 
-Route::get('/', [\App\Http\Controllers\ProductController::class, 'index']);
+Route::get('/', [\App\Http\Controllers\ProductController::class, 'index'])->name('pro.index');
 
 Route::get('/product/{productId}', [\App\Http\Controllers\ProductController::class, 'product'])->name('products.product');
 

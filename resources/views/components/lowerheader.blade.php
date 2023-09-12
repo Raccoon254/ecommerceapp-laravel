@@ -6,14 +6,15 @@
         <div id="responsive-nav">
             <!-- NAV -->
             <ul class="main-nav nav navbar-nav">
-                @foreach($categories as $category)
-                        <?php $firstName = explode(" ", $category->name)[0]; ?>
+                @foreach($categories->take(10) as $category)
+                        <?php $firstName = $category->name ?>
                     <li>
-                        <a href="#" class="category-link" data-category-id="{{ $category->id }}">{{ $firstName }}</a>
+                        <a href="#" class="category-link text-sm" data-category-id="{{ $category->id }}">{{ $firstName }}</a>
                     </li>
                 @endforeach
             </ul>
             <!-- /NAV -->
+
         </div>
         <!-- /responsive-nav -->
     </div>

@@ -384,20 +384,23 @@ class ProductController extends Controller
 
         $products = Product::with('images')
             ->whereBetween('price', [$minPrice, $maxPrice])
-            ->get();
+            ->paginate(12);
 
         return view('product-list-partial', ['products' => $products]);
     }
 
     public function filterByCategory(Request $request): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
-        if ($request->has('categories') && count($request->categories) > 0) {
-            $products = Product::whereIn('category_id', $request->categories)->get();  // Update to category_id
-        } else {
-            $products = Product::all();
-        }
+        $selectedCategories = $request->input('categories', []);
+
+        // Use Eloquent's whereIn method to filter products by selected category IDs
+        $productsQuery = Product::whereIn('category_id', $selectedCategories);
+
+        // Retrieve the products and paginate the results
+        $products = $productsQuery->paginate(12); // Adjust the page size (12) as needed
 
         return view('product-list-partial', ['products' => $products]);
     }
+
 
 }

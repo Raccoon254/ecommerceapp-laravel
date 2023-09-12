@@ -174,6 +174,8 @@
 						<div class="row">
                             <div id="product-list">
                                 @include('product-list-partial', ['products' => $products])
+
+                                {{ $products->links('vendor.pagination.custom') }}
                             </div>
 						</div>
 						<!-- /store products -->
@@ -181,14 +183,29 @@
 						<!-- store bottom filter -->
 						<div class="store-filter clearfix">
                             <span class="store-qty">Showing {{ sizeof($products) }} products</span>
-							<ul class="store-pagination">
-								<li class="active rounded-3x">1</li>
-								<li class="rounded-3x"><a href="#">2</a></li>
-								<li class="rounded-3x"><a href="#">3</a></li>
-								<li class="rounded-3x"><a href="#">4</a></li>
-								<li class="rounded-3x"><a href="#"><i class="fa fa-angle-right"></i></a></li>
-							</ul>
-						</div>
+                            <ul class="store-pagination">
+                                @if ($products->currentPage() > 1)
+                                    <li class="rounded-3x"><a href="{{ route('pro.index', ['page' => 1]) }}">1</a></li>
+                                @endif
+
+                                @if ($products->currentPage() > 2)
+                                    <li class="rounded-3x"><a href="{{ route('pro.index', ['page' => $products->currentPage() - 1]) }}"><i class="fa fa-angle-left"></i></a></li>
+                                @endif
+
+                                @for ($i = max(1, $products->currentPage() - 1); $i <= min($products->lastPage(), $products->currentPage() + 1); $i++)
+                                    <li class="rounded-3x {{ ($i === $products->currentPage()) ? 'active' : 'rounded-3x' }}"><a href="{{ route('pro.index', ['page' => $i]) }}">{{ $i }}</a></li>
+                                @endfor
+
+                                @if ($products->currentPage() < $products->lastPage() - 1)
+                                    <li class="rounded-3x"><a href="{{ route('pro.index', ['page' => $products->currentPage() + 1]) }}"><i class="fa fa-angle-right"></i></a></li>
+                                @endif
+
+                                @if ($products->currentPage() < $products->lastPage())
+                                    <li class="rounded-3x"><a href="{{ route('pro.index', ['page' => $products->lastPage()]) }}">{{ $products->lastPage() }}</a></li>
+                                @endif
+                            </ul>
+
+                        </div>
 						<!-- /store bottom filter -->
 					</div>
 					<!-- /STORE -->
