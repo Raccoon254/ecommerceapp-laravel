@@ -51,7 +51,10 @@
                                 @include('components.category-filter')
                             </div>
 
+
+                            <button id="nextButton">Next</button>
                             <button id="apply-filter">Apply</button>
+
                             <!-- /Category Filter -->
                         </div>
 
